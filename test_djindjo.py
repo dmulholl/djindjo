@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from templatelib import Template
+from djindjo import Template
 
 
 class TestObject:
