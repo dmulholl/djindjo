@@ -38,14 +38,14 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(rendered, "foobar")
 
     def test_print_tag_with_number(self):
-        template = "{{number}}"
+        template = "foo-{{number}}-bar"
         rendered = Template(template).render(data)
-        self.assertEqual(rendered, "123")
+        self.assertEqual(rendered, "foo-123-bar")
 
     def test_print_tag_with_string(self):
-        template = "{{string}}"
+        template = "foo-{{string}}-bar"
         rendered = Template(template).render(data)
-        self.assertEqual(rendered, "barfoo")
+        self.assertEqual(rendered, "foo-barfoo-bar")
 
     def test_print_tag_with_object(self):
         template = "{{object.attribute}}"
