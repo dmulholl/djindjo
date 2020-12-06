@@ -77,81 +77,58 @@ class Lexer:
 
     def tokenize(self):
         while self.index < len(self.template_string):
-            if self.match_comment_tag():
+            if self.match("{#"):
                 self.read_comment_tag()
-            elif self.match_print_tag():
+            elif self.match("{{"):
                 self.read_print_tag()
-            elif self.match_instruction_tag():
+            elif self.match("{%"):
                 self.read_instruction_tag()
             else:
                 self.read_text()
         return self.tokens
 
-    def match_comment_tag(self):
-        if self.index < len(self.template_string) - 1:
-            if self.template_string[self.index] == "{":
-                if self.template_string[self.index + 1] == "#":
-                    return True
+    def match(self, target):
+        if self.template_string.startswith(target, self.index):
+            return True
         return False
 
     def read_comment_tag(self):
         self.index += 2
         while self.index < len(self.template_string) - 1:
-            if self.template_string[self.index] == "#":
-                if self.template_string[self.index + 1] == "}":
-                    self.index += 2
-                    return
+            if self.match("#}"):
+                self.index += 2
+                return
             self.index += 1
         raise TemplateError("unclosed comment tag")
-
-    def match_print_tag(self):
-        if self.index < len(self.template_string) - 1:
-            if self.template_string[self.index] == "{":
-                if self.template_string[self.index + 1] == "{":
-                    return True
-        return False
 
     def read_print_tag(self):
         self.index += 2
         start_index = self.index
         while self.index < len(self.template_string) - 1:
-            if self.template_string[self.index] == "}":
-                if self.template_string[self.index + 1] == "}":
-                    text = self.template_string[start_index:self.index].strip()
-                    self.tokens.append(Token("print", text))
-                    self.index += 2
-                    return
+            if self.match("}}"):
+                text = self.template_string[start_index:self.index].strip()
+                self.tokens.append(Token("print", text))
+                self.index += 2
+                return
             self.index += 1
         raise TemplateError("unclosed print tag")
-
-    def match_instruction_tag(self):
-        if self.index < len(self.template_string) - 1:
-            if self.template_string[self.index] == "{":
-                if self.template_string[self.index + 1] == "%":
-                    return True
-        return False
 
     def read_instruction_tag(self):
         self.index += 2
         start_index = self.index
         while self.index < len(self.template_string) - 1:
-            if self.template_string[self.index] == "%":
-                if self.template_string[self.index + 1] == "}":
-                    text = self.template_string[start_index:self.index].strip()
-                    self.tokens.append(Token("instruction", text))
-                    self.index += 2
-                    return
+            if self.match("%}"):
+                text = self.template_string[start_index:self.index].strip()
+                self.tokens.append(Token("instruction", text))
+                self.index += 2
+                return
             self.index += 1
         raise TemplateError("unclosed instruction tag")
 
     def read_text(self):
         start_index = self.index
         while self.index < len(self.template_string):
-            if self.match_comment_tag():
-                break
-            if self.match_print_tag():
-                break
-            if self.match_instruction_tag():
+            if self.match("{#") or self.match("{{") or self.match("{%"):
                 break
             self.index += 1
         text = self.template_string[start_index:self.index]
